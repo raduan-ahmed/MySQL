@@ -1,0 +1,84 @@
+(1) CREATE DATABASE CompanyDB;
+CREATE TABLE Employees (
+    EmployeeID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    DepartmentID INT
+);
+CREATE TABLE Departments (
+    DepartmentID INT AUTO_INCREMENT PRIMARY KEY,
+    DepartmentName VARCHAR(255) NOT NULL
+);
+INSERT INTO Departments (DepartmentName) VALUES
+('Human Resources'),
+('Engineering'),
+('Finance'),
+('Marketing');
+INSERT INTO Employees (Name, DepartmentID) VALUES
+('Alice Johnson', 1),
+('Bob Smith', 2),
+('Charlie Brown', 3),
+('Diana Prince', 2),
+('Eve Adams', 4);
+SELECT 
+    Employees.Name AS EmployeeName, 
+    Departments.DepartmentName
+FROM 
+    Employees
+JOIN 
+    Departments
+ON 
+    Employees.DepartmentID = Departments.DepartmentID;
+
+
+(2) CREATE TABLE EmployeeLog (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID INT,
+    Name VARCHAR(255),
+    DepartmentID INT,
+    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER $$
+CREATE TRIGGER AfterEmployeeInsert
+AFTER INSERT ON Employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO EmployeeLog (EmployeeID, Name, DepartmentID)
+    VALUES (NEW.EmployeeID, NEW.Name, NEW.DepartmentID);
+END $$
+DELIMITER ;
+
+SELECT * FROM EmployeeLog;
+
+(3) DELIMITER $$
+CREATE PROCEDURE GetEmployeesByDepartment(IN deptName VARCHAR(255))
+BEGIN
+    SELECT 
+        Employees.EmployeeID, 
+        Employees.Name
+    FROM 
+        Employees
+    JOIN 
+        Departments
+    ON 
+        Employees.DepartmentID = Departments.DepartmentID
+    WHERE 
+        Departments.DepartmentName = deptName;
+END $$
+DELIMITER ;
+
+CALL GetEmployeesByDepartment('Engineering');
+
+4) CREATE VIEW EmployeeDepartmentView AS
+SELECT 
+    Employees.EmployeeID,
+    Employees.Name AS EmployeeName,
+    Departments.DepartmentName
+FROM 
+    Employees
+JOIN 
+    Departments
+ON 
+    Employees.DepartmentID = Departments.DepartmentID;
+
+SELECT * FROM EmployeeDepartmentView;
